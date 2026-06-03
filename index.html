@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>MQTT Auto Client</title>
+
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    #log { border: 1px solid #ccc; padding: 10px; height: 300px; overflow: auto; }
+  </style>
+</head>
+<body>
+
+<h2>MQTT Client</h2>
+<div id="status">Łączenie...</div>
+<div id="log"></div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+
+  const topic = params.get("topic") || "/pxcpl/test";
+
+  const log = (msg) => {
+    document.getElementById("log").innerHTML += msg + "<br>";
+  };
+
+  const client = mqtt.connect("wss://broker.hivemq.com:8884/mqtt");
+
+  client.on("connect", () => {
+    document.getElementById("status").innerText = "✅ Połączono";
+    log("Połączono z brokerem");
+
+    client.subscribe(topic, (err) => {
+      if (!err) {
+        log("Subskrypcja: " + topic);
+      }
+    });
+  });
+
+  client.on("message", (topic, message) => {
+    log("📩 " + topic + ": " + message.toString());
+  });
+
+  client.on("error", err => {
+    log("❌ " + err);
+  });
+</script>
+
+</body>
+</html>
